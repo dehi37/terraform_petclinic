@@ -52,16 +52,17 @@ terraform apply
 terraform output alb_dns_name
 
 # 8. Se connecter au registre privé AWS ECR sur le cmd avec cette commande : 
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 049618906674.dkr.ecr.us-east-1.amazonaws.com
+ECR_URL=$(terraform output -raw ecr_repository_url)
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_URL
 
 # 9. Construire l'image Docker localement : Toujours à l'intérieur du dossier spring-petclinic (là où se trouve le Dockerfile fourni par le projet), lancez la création de l'image Docker : 
 ./mvnw spring-boot:build-image
 
 # 10. Étiqueter (Tag) l'image pour AWS ECR : 
-docker tag spring-petclinic:4.0.0-SNAPSHOT 049618906674.dkr.ecr.us-east-1.amazonaws.com/petclinic-isi-prod/petclinic-isi:latest
+docker tag spring-petclinic:4.0.0-SNAPSHOT $ECR_URL:latest
 
 # 11. Push l'image sur AWS ECR : 
-docker push 049618906674.dkr.ecr.us-east-1.amazonaws.com/petclinic-isi-prod/petclinic-isi:latest
+docker push $ECR_URL:latest
 
 # 12. Sur AWS CLI forcer le redeployment ECS : 
 aws ecs update-service --cluster petclinic-isi-prod-cluster --service petclinic-isi-prod-service --force-new-deployment
@@ -79,12 +80,21 @@ terraform apply
 # a. suppressions de l'infrastructure deployée sur AWS
 terraform destroy -auto-approve
 
-# b. Supprimer les fichiers d'état locaux
+# b. supprimer les logs sur AWS CLI :
+
+aws logs delete-log-group --log-group-name /aws/vpc/petclinic-isi-prod/flow-logs
+aws logs delete-log-group --log-group-name /aws/ecs/containerinsights/petclinic-isi-prod-cluster/performance
+aws logs delete-log-group --log-group-name /aws/ecs/containerinsights/petclinic-prod-cluster/performance
+aws logs delete-log-group --log-group-name RDSOSMetrics
+
+# c. Supprimer les fichiers d'état locaux
 Write-Host "=== Suppression du state local ==="
 
 Remove-Item terraform.tfstate* -ErrorAction SilentlyContinue
 Remove-Item .terraform -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item .terraform.lock.hcl -ErrorAction SilentlyContinue
+
+
 
 ```
 

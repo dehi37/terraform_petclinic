@@ -51,20 +51,30 @@ terraform apply
 # 7. Récupérer l'URL de l'application
 terraform output alb_dns_name
 
-# 8. Construire et pousser l'image Docker
-eval $(terraform output -raw deploy_instructions)
-# ou manuellement :
-ECR_URL=$(terraform output -raw ecr_repository_url)
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_URL
-docker build -t petclinic ../spring-petclinic/
-docker tag petclinic:latest $ECR_URL:latest
-docker push $ECR_URL:latest
+# 8. Se connecter au registre privé AWS ECR sur le cmd avec cette commande : 
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 049618906674.dkr.ecr.us-east-1.amazonaws.com
 
-# 8. Mettre à jour l'image dans la variable et re-appliquer
+# 9. Construire l'image Docker localement : Toujours à l'intérieur du dossier spring-petclinic (là où se trouve le Dockerfile fourni par le projet), lancez la création de l'image Docker : 
+./mvnw spring-boot:build-image
+
+# 10. Étiqueter (Tag) l'image pour AWS ECR : 
+docker tag spring-petclinic:4.0.0-SNAPSHOT 049618906674.dkr.ecr.us-east-1.amazonaws.com/petclinic-isi-prod/petclinic-isi:latest
+
+# 11. Push l'image sur AWS ECR : 
+docker push 049618906674.dkr.ecr.us-east-1.amazonaws.com/petclinic-isi-prod/petclinic-isi:latest
+
+# 12. Sur AWS CLI forcer le redeployment ECS : 
+aws ecs update-service --cluster petclinic-isi-prod-cluster --service petclinic-isi-prod-service --force-new-deployment
+
+# 13. Attendre pendant 2 à 3 minutes, ensuite nous allons récupérer l’URL de l’application : 
+terraform output alb_dns_name
+
+
+# 14. Mettre à jour l'image dans la variable et re-appliquer
 # Éditer terraform.tfvars : container_image = "$ECR_URL:latest"
 terraform apply
 
-# 9. Nettoyage (OBLIGATOIRE en fin de TP)
+# 15. Nettoyage (OBLIGATOIRE en fin de TP)
 
 # a. suppressions de l'infrastructure deployée sur AWS
 terraform destroy -auto-approve

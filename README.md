@@ -29,6 +29,15 @@ Internet → ALB (HTTPS 443) → ECS Fargate (privé, 3 AZ) → RDS PostgreSQL M
 ## Déploiement
 
 ```bash
+
+# 0. Initialiser et pousser le code sur GitHub (dehi37/terraform_petclinic)
+git init
+git add .
+git branch -M main
+git commit -m "feat: ajout de l'infrastructure Terraform PetClinic"
+git remote add origin https://github.com/dehi37/terraform_petclinic.git
+git push -u origin main
+
 # 1. Cloner le dépôt et aller dans le dossier terraform
 cd terraform/
 

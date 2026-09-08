@@ -29,7 +29,13 @@ Internet → ALB (HTTPS 443) → ECS Fargate (privé, 3 AZ) → RDS PostgreSQL M
 ## Déploiement
 
 ```bash
-
+# avant de faire quoi que ce soit, il faut d'abord personnalisé deux fichiers
+# le fichier terraform/terraform.tfvars, la ligne 37 
+# alarm_email = "votre-adresse-mail@mail.com", mettez votre adresse mail pour recevoir des alarm
+# 
+#le fichier terraform/variables.tf, la ligne 154
+# default     = "votre-adresse-mail@mail.com", mettez votre adresse mail
+#
 # 0. Initialiser et pousser le code sur GitHub (dehi37/terraform_petclinic)
 git init
 git add .

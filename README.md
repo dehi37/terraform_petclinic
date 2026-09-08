@@ -45,7 +45,7 @@ terraform validate
 # 5. Vérifier le plan
 terraform plan
 
-# 6. Déployer automatisatique (environ 15-20 minutes)
+# 6. Déployer automatiquement (environ 15-20 minutes)
 terraform apply -auto-approve
 
 # 7. Récupérer l'URL de l'application

@@ -40,7 +40,9 @@ output "deploy_instructions" {
 
     2. Builder et pousser l'image :
        docker build -t ${var.project_name} .
+       #./mvnw spring-boot:build-image
        docker tag ${var.project_name}:latest ${module.ecr.repository_url}:latest
+       #docker tag spring-petclinic:4.0.0-SNAPSHOT ${module.ecr.repository_url}:latest
        docker push ${module.ecr.repository_url}:latest
 
     3. Forcer le redéploiement ECS :
